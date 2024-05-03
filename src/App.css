@@ -1,0 +1,11 @@
+.pagination {
+  position: sticky;
+  bottom: 0;
+  background: #fff; /* Optional: background to ensure text isn't obscured */
+  padding: 10px 0;
+  border-top: 1px solid #ccc; /* Optional: adds a line above the pagination */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Ensure it's above other content */
+}

@@ -1,0 +1,176 @@
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Dropdown } from "react-bootstrap";
+import { signoutSuccess } from "../redux/user/userSlice";
+import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+
+export default function Header() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const [searchTerm, setSerachTeam] = useState("");
+  console.log(searchTerm);
+  const { currentUser } = useSelector((state) => state.user);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const searchTermFromUrl = urlParams.get("searchTerm");
+    if (searchTermFromUrl) {
+      setSerachTeam(searchTermFromUrl);
+    }
+  }, [location.search]);
+
+  const handleSignout = async () => {
+    try {
+      const res = await fetch("api/user/signout", {
+        method: "POST",
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.log(data.message);
+      } else {
+        dispatch(signoutSuccess());
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set("searchTerm", searchTerm);
+    const searchQuery = urlParams.toString();
+    navigate(`/search?${searchQuery}`);
+  };
+
+  return (
+    <>
+      <nav
+        className="navbar navbar-expand-lg"
+        style={{ backgroundColor: "#F7F7F7" }}
+      >
+        <div className="container-fluid">
+          <Link
+            to="/"
+            className="navbar-brand"
+            style={{ color: "#C9B0FD", marginLeft: "70px", fontWeight: "bold" }}
+          >
+            <span
+              style={{
+                backgroundImage: "linear-gradient(45deg, #C9B0FD, #EA6B50)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+              }}
+            >
+              RealStories
+            </span>{" "}
+            Blog
+          </Link>
+
+          <form
+            className="d-flex"
+            role="search"
+            style={{ marginLeft: "190px" }}
+            onSubmit={handleSubmit}
+          >
+            <input
+              className="form-control me-2"
+              type="search"
+              placeholder="Search"
+              aria-label="Search"
+              value={searchTerm}
+              onChange={(e) => setSerachTeam(e.target.value)}
+            />
+          </form>
+
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            <li className="nav-item">
+              <Link
+                to="/"
+                className="nav-link active"
+                aria-current="page"
+                style={{ fontWeight: "bold", marginLeft: "50px" }}
+              >
+                Home
+              </Link>
+            </li>
+            <li className="nav-item">
+              <Link
+                to="/about"
+                className="nav-link active"
+                aria-current="page"
+                style={{ fontWeight: "bold", marginLeft: "30px" }}
+              >
+                About
+              </Link>
+            </li>
+          </ul>
+
+          <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+            {currentUser ? (
+              <Dropdown>
+                <Dropdown.Toggle
+                  variant="secondary"
+                  id="dropdown-basic"
+                  bsPrefix="p-0"
+                  style={{ backgroundColor: "transparent", border: "none" }}
+                >
+                  <img
+                    src={currentUser.profilePicture}
+                    alt="user"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                    }}
+                  />
+                </Dropdown.Toggle>
+
+                <Dropdown.Menu>
+                  <Dropdown.Item>
+                    <Link
+                      to="/dashboard?tab=profile"
+                      style={{ textDecoration: "none", color: "black" }}
+                    >
+                      Profile
+                    </Link>
+                  </Dropdown.Item>
+
+                  <Dropdown.Item>
+                    <Link
+                      onClick={handleSignout}
+                      style={{ textDecoration: "none", color: "black" }}
+                    >
+                      Sign Out
+                    </Link>
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            ) : (
+              <button
+                style={{
+                  background: "linear-gradient(to right, purple, blue)",
+                  border: "none",
+                  color: "white",
+                  padding: "10px 20px",
+                  borderRadius: "10px",
+                  textDecoration: "none",
+                  marginLeft: "80px",
+                }}
+              >
+                <Link
+                  to="/sign-in"
+                  style={{ textDecoration: "none", color: "white" }}
+                >
+                  SignIn
+                </Link>
+              </button>
+            )}
+          </ul>
+        </div>
+      </nav>
+    </>
+  );
+}
